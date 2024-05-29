@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TypeScript HTML App</title>
+  <style>
+    html, body {
+      margin: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
+    canvas {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+    #inputText {
+      position: absolute;
+      z-index: 100;
+      bottom: 0;
+      left: 0;
+      width: 29%;
+      height: 15%;
+      background: rgba(173, 216, 230, 0.5);
+      border-radius: 10px 10px 10px 0px;
+    }
+    #logContainer {
+      position: absolute;
+      z-index: 100;
+      bottom: 20%;
+      left: 0;
+      width: 30%;
+      height: 30%;
+      overflow-y: scroll;
+      background: rgba(173, 216, 230, 0.5);
+      border-radius: 10px 10px 10px 0px;
+    }
+    #manageElementButton {
+      position: absolute;
+      z-index: 100;
+      bottom: 0;
+      right: 0;
+      margin: 10px;
+    }
+    #managementContainer {
+      position: fixed;
+      z-index: 200;
+      top: 50%;
+      bottom: 0;
+      left: 50%;
+      width: 70%;
+      height: 70%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: top;
+      color: white;
+      padding: 5px;
+      box-sizing: border-box;
+      overflow-y: scroll;
+    }
+    .platformInputContainer {
+      margin: 10px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .urlListItem {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 5px;
+      border-radius: 5px;
+      margin: 5px 0;
+    }
+    .urlListItem input {
+      margin-right: 10px;
+    }
+    .urlEditContainer {
+      display: flex;
+      flex-direction: column;
+      margin-right: 10px;
+    }
+    .urlEditContainer input {
+      margin-bottom: 5px;
+    }
+    #urlButtonsContainer {
+      position: absolute;
+      z-index: 100;
+      top: 0;
+      right: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Adjust the minmax value for size */
+      gap: 10px;
+      margin: 10px;
+    }
+    #urlListContainer {
+      width: 100%;
+      max-width: 400px;
+    }
+    #urlListTableBody {
+      max-height: 50vh;
+      overflow-y: auto;
+    }
+    input[type="text"] {
+      width: calc(100% - 20px);
+      margin: 5px 10px;
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin: 5px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .app-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 80px; /* Adjust size */
+      height: 80px; /* Adjust size */
+      background: rgba(173, 216, 230, 0.5);
+      border-radius: 20%;
+      text-align: center;
+      overflow: hidden;
+    }
+    .app-icon img {
+      width: 40px; /* Adjust icon size */
+      height: 40px; /* Adjust icon size */
+      margin-bottom: 5px;
+    }
+  </style>
+  <script src="./Core/live2dcubismcore.js"></script>
+  <script src="./src/main.ts" type="module"></script>
+</head>
+<body>
+  <div id="logContainer">
+    <div id="logContent"></div>
+  </div>
+  <textarea id="inputText" placeholder="ここに入力"></textarea>
+  <button id="manageElementButton">要素の管理</button>
+  <div id="managementContainer">
+    <h2>要素の管理</h2>
+    <div id="urlListContainer">
+      <table>
+        <thead>
+          <tr>
+            <th>表示名</th>
+            <th>URL</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="urlListTableBody"></tbody>
+      </table>
+    </div>
+    <div class="platformInputContainer">
+      <h3>自由入力</h3>
+      <input type="text" id="urlInput" placeholder="URLを入力">
+      <input type="text" id="urlDisplayNameInput" placeholder="表示名を入力">
+      <input type="text" id="urlIconInput" placeholder="アイコンURLを入力">
+      <button id="addUrlButton">追加</button>
+    </div>
+    <div class="platformInputContainer">
+      <h3>YouTube</h3>
+      <input type="text" id="youtubeIdInput" placeholder="YouTube IDを入力">
+      <button id="addYoutubeButton">追加</button>
+    </div>
+    <div class="platformInputContainer">
+      <h3>Twitter</h3>
+      <input type="text" id="twitterIdInput" placeholder="Twitter IDを入力">
+      <button id="addTwitterButton">追加</button>
+    </div>
+    <div class="platformInputContainer">
+      <h3>Facebook</h3>
+      <input type="text" id="facebookIdInput" placeholder="Facebook IDを入力">
+      <button id="addFacebookButton">追加</button>
+    </div>
+    <div class="platformInputContainer">
+      <h3>Instagram</h3>
+      <input type="text" id="instagramIdInput" placeholder="Instagram IDを入力">
+      <button id="addInstagramButton">追加</button>
+    </div>
+    <div class="platformInputContainer">
+      <h3>Niconico動画</h3>
+      <input type="text" id="niconicoIdInput" placeholder="Niconico動画 IDを入力">
+      <button id="addNiconicoButton">追加</button>
+    </div>
+    <button id="closeManagementButton">閉じる</button>
+  </div>
+  <div id="urlButtonsContainer"></div>
+</body>
+</html>
