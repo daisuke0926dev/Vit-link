@@ -70,72 +70,21 @@ window.addEventListener('DOMContentLoaded', () => {
 
   let isShiftPressed = false;
 
-  inputText.addEventListener('keydown', async (event: KeyboardEvent) => {
-    if (event.key === 'Enter' && !isShiftPressed) {
-      event.preventDefault();
-      const inputTextValue = inputText.value;
-      inputText.value = '';
+  const saveUrlsToLocalStorage = () => {
+    const urls = Array.from(urlListTableBody.children).map((item) => {
+      const displayName = (item.children[0] as HTMLTableCellElement).textContent;
+      const url = (item.children[1] as HTMLTableCellElement).textContent;
+      return { displayName, url };
+    });
+    localStorage.setItem('urls', JSON.stringify(urls));
+  };
 
-      logContent.innerHTML += `<div style="background-color: rgba(173, 216, 230, 0.5);">${inputTextValue}</div>`;
-      logContent.scrollTo({
-        top: logContent.scrollHeight,
-        behavior: "smooth",
-      });
-
-      // POSTリクエストを送信してレスポンスを集める
-      let responseText = '';
-      let done = false;
-
-      while (!done) {
-        const response = await fetch('http://localhost:11434/api/generate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'llama3',
-            prompt: inputTextValue
-          }),
-        });
-
-        const responseLines = await response.text();
-        const responseArray = responseLines.trim().split('\n');
-        
-        responseArray.forEach(line => {
-          try {
-            const responseData = JSON.parse(line);
-            responseText += responseData.response;
-            done = responseData.done;
-
-            logContainer.innerHTML += `<div style="background-color: rgba(144, 238, 144, 0.5);">${responseData.response}</div>`;
-            logContainer.scrollTo({
-              top: logContainer.scrollHeight,
-              behavior: "smooth",
-            });
-          } catch (error) {
-            console.error('Error parsing JSON:', error);
-          }
-        });
-      }
-    } else if (event.key === 'Shift') {
-      isShiftPressed = true;
-    }
-  });
-
-  inputText.addEventListener('keyup', (event: KeyboardEvent) => {
-    if (event.key === 'Shift') {
-      isShiftPressed = false;
-    }
-  });
-
-  manageElementButton.addEventListener('click', () => {
-    updateUrlList();
-    managementContainer.style.display = 'flex';
-  });
-
-  closeManagementButton.addEventListener('click', () => {
-    managementContainer.style.display = 'none';
-  });
+  const loadUrlsFromLocalStorage = () => {
+    const urls = JSON.parse(localStorage.getItem('urls') || '[]');
+    urls.forEach(({ displayName, url }: { displayName: string; url: string }) => {
+      addUrlButtonFunction(url, displayName);
+    });
+  };
 
   const addUrlButtonFunction = (url: string, displayName: string, iconSrc: string = '') => {
     if (url && displayName) {
@@ -167,6 +116,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if (previousSibling) {
           urlListTableBody.insertBefore(urlListItem, previousSibling);
         }
+        saveUrlsToLocalStorage();
       });
 
       const moveDownButton = document.createElement('button');
@@ -176,6 +126,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if (nextSibling) {
           urlListTableBody.insertBefore(nextSibling, urlListItem);
         }
+        saveUrlsToLocalStorage();
       });
 
       const editButton = document.createElement('button');
@@ -188,7 +139,7 @@ window.addEventListener('DOMContentLoaded', () => {
           urlCell.textContent = newUrl;
           urlLink.textContent = newDisplayName;
           urlLink.onclick = () => window.open(newUrl, '_blank');
-          updateUrlList();
+          saveUrlsToLocalStorage();
         }
       });
 
@@ -197,7 +148,7 @@ window.addEventListener('DOMContentLoaded', () => {
       deleteButton.addEventListener('click', () => {
         urlListTableBody.removeChild(urlListItem);
         urlButtonsContainer.removeChild(urlLink);
-        updateUrlList();
+        saveUrlsToLocalStorage();
       });
 
       actionsCell.appendChild(moveUpButton);
@@ -211,6 +162,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
       urlListTableBody.appendChild(urlListItem);
       urlButtonsContainer.appendChild(urlLink);
+
+      saveUrlsToLocalStorage(); // 追加後に保存を呼び出す
     }
   };
 
@@ -221,6 +174,85 @@ window.addEventListener('DOMContentLoaded', () => {
       urlListTableBody.appendChild(item);
     }
   };
+
+  inputText.addEventListener('keydown', async (event: KeyboardEvent) => {
+    if (event.key === 'Enter' && !isShiftPressed) {
+      event.preventDefault();
+      
+      logContent.innerHTML += `<div style="background-color: rgba(173, 216, 230, 0.5);">${inputText.value}</div>`;
+      logContent.scrollTo({
+        top: logContent.scrollHeight,
+        behavior: "smooth",
+      });
+      
+      // POSTリクエストを送信してレスポンスを集める
+      let done = false;
+      const responseTextArray = [];
+      
+      const response = await fetch('https://27asamqngc.execute-api.ap-southeast-2.amazonaws.com/beta/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(
+          {input: inputText.value,})
+        });
+      // while (!done) {
+      //   const response = await fetch('http://localhost:11434/api/generate', {
+      //     method: 'POST',
+      //     headers: {
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: JSON.stringify({
+      //       model: 'llama3',
+      //       prompt: inputTextValue
+      //     }),
+      //   });
+        
+        
+      //   const jsonResponse = await response.json();
+      //   responseTextArray.push(jsonResponse.response);
+      //   done = jsonResponse.done;
+        
+      //   console.log("A" + jsonResponse);
+      // }
+      // const combinedResponse = responseTextArray.join('');
+      // console.log("AA" + combinedResponse);
+      const combinedResponse = await response.json();
+      console.log("VV" + JSON.stringify(combinedResponse));
+      eval(JSON.stringify(combinedResponse));
+      inputText.value = '';
+
+      window.addEventListener('DOMContentLoaded', async () => {
+        // 実装：レスポンスから星で囲まれたjsonを取り出したのち、eval_codeを取り出して、evalで実行。
+        // const jsonData = combinedResponse.match(/★(.*)★/)[1];
+        // const { eval_code } = JSON.parse(jsonData);
+        // eval(eval_code);
+      });
+      
+      logContainer.scrollTo({
+        top: logContainer.scrollHeight,
+        behavior: "smooth",
+      });
+    } else if (event.key === 'Shift') {
+      isShiftPressed = true;
+    }
+  });
+
+  inputText.addEventListener('keyup', (event: KeyboardEvent) => {
+    if (event.key === 'Shift') {
+      isShiftPressed = false;
+    }
+  });
+
+  manageElementButton.addEventListener('click', () => {
+    updateUrlList();
+    managementContainer.style.display = 'flex';
+  });
+
+  closeManagementButton.addEventListener('click', () => {
+    managementContainer.style.display = 'none';
+  });
 
   addUrlButton.addEventListener('click', () => {
     const url = urlInput.value;
@@ -235,14 +267,16 @@ window.addEventListener('DOMContentLoaded', () => {
   addYoutubeButton.addEventListener('click', () => {
     const youtubeId = youtubeIdInput.value;
     const url = `https://www.youtube.com/watch?v=${youtubeId}`;
-    addUrlButtonFunction(url, 'YouTube');
+    const iconSrc = '../../Resources/youtube.png';
+    addUrlButtonFunction(url, 'YouTube', iconSrc);
     youtubeIdInput.value = '';
   });
 
   addTwitterButton.addEventListener('click', () => {
     const twitterId = twitterIdInput.value;
     const url = `https://twitter.com/${twitterId}`;
-    addUrlButtonFunction(url, 'Twitter');
+    const iconSrc = '../../Resources/twitter.png';
+    addUrlButtonFunction(url, 'Twitter', iconSrc);
     twitterIdInput.value = '';
   });
 
@@ -256,7 +290,8 @@ window.addEventListener('DOMContentLoaded', () => {
   addInstagramButton.addEventListener('click', () => {
     const instagramId = instagramIdInput.value;
     const url = `https://www.instagram.com/${instagramId}`;
-    addUrlButtonFunction(url, 'Instagram');
+    const iconSrc = '../../Resources/insta.png';
+    addUrlButtonFunction(url, 'Instagram', iconSrc);
     instagramIdInput.value = '';
   });
 
@@ -266,4 +301,6 @@ window.addEventListener('DOMContentLoaded', () => {
     addUrlButtonFunction(url, 'Niconico動画');
     niconicoIdInput.value = '';
   });
+
+  loadUrlsFromLocalStorage(); // ページ読み込み時に保存されたURLを復元する
 });

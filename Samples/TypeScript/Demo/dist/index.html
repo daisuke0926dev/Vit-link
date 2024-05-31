@@ -21,7 +21,7 @@
       z-index: 100;
       bottom: 0;
       left: 0;
-      width: 29%;
+      width: 39%;
       height: 15%;
       background: rgba(173, 216, 230, 0.5);
       border-radius: 10px 10px 10px 0px;
@@ -31,11 +31,24 @@
       z-index: 100;
       bottom: 20%;
       left: 0;
-      width: 30%;
+      width: 40%;
       height: 30%;
       overflow-y: scroll;
       background: rgba(173, 216, 230, 0.5);
       border-radius: 10px 10px 10px 0px;
+    }
+    #imageDesk img {
+      position: absolute;
+      max-width: 100%;
+      max-height: 100%;
+      bottom: 0%;
+    }
+    #imageMic img {
+      position: absolute;
+      max-width: 60%;
+      max-height: 60%;
+      left: 10%;
+      bottom: 0%;
     }
     #manageElementButton {
       position: absolute;
@@ -43,7 +56,14 @@
       bottom: 0;
       right: 0;
       margin: 10px;
+      opacity: 0; /* 初期状態では見えないようにする */
+      transition: opacity 0.3s;
     }
+    
+    #manageElementButton:hover {
+      opacity: 1; /* マウスホバー時に表示 */
+    }
+    
     #managementContainer {
       position: fixed;
       z-index: 200;
@@ -150,6 +170,7 @@
       border-radius: 20%;
       text-align: center;
       overflow: hidden;
+      color: rgba(0, 0, 0, 0.5); /* 文字色を薄く設定 */
     }
     .app-icon img {
       width: 40px; /* Adjust icon size */
@@ -157,8 +178,9 @@
       margin-bottom: 5px;
     }
   </style>
+  
   <script src="./Core/live2dcubismcore.js"></script>
-  <script type="module" crossorigin src="/assets/index-I69HGsCn.js"></script>
+  <script type="module" crossorigin src="/assets/index-v_aKMnsb.js"></script>
 </head>
 <body>
   <div id="logContainer">
@@ -166,6 +188,12 @@
   </div>
   <textarea id="inputText" placeholder="ここに入力"></textarea>
   <button id="manageElementButton">要素の管理</button>
+  <div id="imageDesk">
+    <img src="/assets/desk-CkEf8k9F.png">
+  </div>
+  <div id="imageMic">
+    <img src="/assets/mic-YIHKjTmj.png">
+  </div>
   <div id="managementContainer">
     <h2>要素の管理</h2>
     <div id="urlListContainer">

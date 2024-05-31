@@ -52,7 +52,8 @@ export class LAppView {
     const top: number = LAppDefine.ViewLogicalRight;
 
     this._viewMatrix.setScreenRect(left, right, bottom, top); // デバイスに対応する画面の範囲。 Xの左端、Xの右端、Yの下端、Yの上端
-    this._viewMatrix.scale(LAppDefine.ViewScale, LAppDefine.ViewScale);
+    this._viewMatrix.scale(LAppDefine.ViewScale * 2, LAppDefine.ViewScale * 2);
+    this._viewMatrix.translate(0.0, -1.2); // 位置を変更
 
     this._deviceToScreen.loadIdentity();
     if (width > height) {
@@ -68,7 +69,7 @@ export class LAppView {
     this._viewMatrix.setMaxScale(LAppDefine.ViewMaxScale); // 限界拡張率
     this._viewMatrix.setMinScale(LAppDefine.ViewMinScale); // 限界縮小率
 
-    // 表示できる��範囲
+    // 表示できる範囲
     this._viewMatrix.setMaxScreenRect(
       LAppDefine.ViewLogicalMaxLeft,
       LAppDefine.ViewLogicalMaxRight,
@@ -103,9 +104,9 @@ export class LAppView {
   public render(): void {
     gl.useProgram(this._programId);
 
-    // if (this._back) {
-    //   this._back.render(this._programId);
-    // }
+    if (this._back) {
+      this._back.render(this._programId);
+    }
     if (this._gear) {
       this._gear.render(this._programId);
     }
@@ -132,23 +133,23 @@ export class LAppView {
     let imageName = '';
 
     // 背景画初期化
-    // imageName = LAppDefine.BackImageName;
+    imageName = LAppDefine.BackImageName;
 
     // 非同期なのでコールバック関数を作成
-    // const initBackGroundTexture = (textureInfo: TextureInfo): void => {
-    //   const x: number = width * 0.5;
-    //   const y: number = height * 0.5;
+    const initBackGroundTexture = (textureInfo: TextureInfo): void => {
+      const x: number = width * 0.5;
+      const y: number = height * 0.5;
 
-    //   const fwidth = textureInfo.width * 2.0;
-    //   const fheight = height * 0.95;
-    //   this._back = new LAppSprite(x, y, fwidth, fheight, textureInfo.id);
-    // };
+      const fwidth = width; // 背景画像を画面サイズにリサイズ
+      const fheight = height; // 背景画像を画面サイズにリサイズ
+      this._back = new LAppSprite(x, y, fwidth, fheight, textureInfo.id);
+    };
 
-    // textureManager.createTextureFromPngFile(
-    //   resourcesPath + imageName,
-    //   false,
-    //   initBackGroundTexture
-    // );
+    textureManager.createTextureFromPngFile(
+      resourcesPath + imageName,
+      false,
+      initBackGroundTexture
+    );
 
     // 歯車画像初期化
     imageName = LAppDefine.GearImageName;
@@ -186,7 +187,7 @@ export class LAppView {
   }
 
   /**
-   * タッチしているときにポインタが動いたら呼ばれる。
+   * タ���チしているときにポインタが動いたら呼ばれる。
    *
    * @param pointX スクリーンX座標
    * @param pointY スクリーンY座標
@@ -286,18 +287,4 @@ export class LAppView {
   _gear: LAppSprite; // ギア画像
   _changeModel: boolean; // モデル切り替えフラグ
   _isClick: boolean; // クリック中
-}
-
-function uploadFiles() {
-  const files = document.getElementById('upload').files;
-  const model = new LAppModel(); // LAppModelのインスタンスを作成
-
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      model.loadAssets('', file.name); // モデルをロード
-    };
-    reader.readAsArrayBuffer(file);
-  }
 }
